@@ -1,0 +1,8 @@
+Sys.setlocale('LC_CTYPE','Korean_Korea.utf8')
+source('ai_clients.R',encoding='UTF-8')
+assignInNamespace('isAvailable',function(...)TRUE,'rstudioapi')
+assignInNamespace('viewer',function(index)cat('VIEWER_INDEX=',jsonlite::toJSON(index,auto_unbox=TRUE),'\n',sep=''),'rstudioapi')
+partial<-lmstudio('test',model='mock',base_url=Sys.getenv('TASK_MOCK_URL'))
+stopifnot(nzchar(partial),identical(.ai_state()$last$finish_reason,'cancelled'))
+cat('\nRESULT_STOPPED\n')
+Sys.sleep(0.8)

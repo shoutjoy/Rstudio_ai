@@ -1,0 +1,12 @@
+Package: jjstat
+Title: AI Integration Verification Fixture
+Version: 0.0.0.9000
+Authors@R: person("Integration", "Tester", email = "test@example.org", role = c("aut", "cre"))
+Description: Temporary package used only to verify the AI integration files.
+License: file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: jsonlite, processx, commonmark, tools, later
+Suggests: rstudioapi, tcltk
+SystemRequirements: curl
+RoxygenNote: 7.3.1

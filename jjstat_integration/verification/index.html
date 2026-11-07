@@ -1,0 +1,100 @@
+<!doctype html><html lang="ko" data-theme="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R AI · Markdown 렌더링</title>
+<style>
+:root{color-scheme:light;--bg:#fff;--fg:#202b38;--panel:#f5f7fa;--line:#ccd5df;--accent:#17639b;--muted:#4b6175;--code:#f1f4f8;--th:#eaf0f7}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#101923;--fg:#eaf1f8;--panel:#182b40;--line:#506477;--accent:#9ed6ff;--muted:#bed5e7;--code:#08121d;--th:#23384d}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 system-ui,"Malgun Gothic",sans-serif}
+body{display:flex;flex-direction:column}header{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.actions{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}button{font:inherit;padding:5px 11px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer}button:hover{background:var(--th)}button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}button:disabled{opacity:.55;cursor:default}
+#status,#copy-status{color:var(--accent);font-size:12px}#question{padding:8px 16px;color:var(--muted);border-bottom:1px solid var(--line);white-space:pre-wrap;max-height:25vh;overflow:auto}
+#answer{width:100%;border:0;flex:1;min-height:0;background:var(--bg)}#copy-status:empty{display:none}
+</style></head><body>
+<header><b>R AI · Markdown 렌더링</b><span id="status">연결 중...</span><div class="actions"><button id="theme-toggle" type="button" aria-pressed="false">다크 모드</button><button id="copy-all" type="button" disabled>전체 내용 복사</button></div><span id="copy-status" role="status" aria-live="polite"></span></header>
+<div id="question"></div><iframe id="answer" sandbox="allow-same-origin" title="AI 응답"></iframe>
+<script src="katex/katex.min.js"></script>
+<script>
+let last=null;
+const frame=document.getElementById("answer");
+const style=`<link rel="stylesheet" href="katex/katex.min.css"><style>
+:root{color-scheme:light;--bg:#fff;--fg:#202b38;--line:#ccd5df;--accent:#17639b;--muted:#4b6175;--code:#f1f4f8;--th:#eaf0f7}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#101923;--fg:#eaf1f8;--line:#506477;--accent:#9ed6ff;--muted:#bed5e7;--code:#08121d;--th:#23384d}
+html,body{background:var(--bg);color:var(--fg);font:14px/1.75 system-ui,"Malgun Gothic",sans-serif;margin:0;padding:8px 14px;overflow-wrap:anywhere}
+h1,h2,h3{line-height:1.35;margin:1.2em 0 .5em}p{margin:.65em 0}a{color:var(--accent)}
+pre{padding:12px;background:var(--code);border-radius:7px;overflow-x:auto}code{font:13px/1.6 Consolas,monospace}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%}th,td{border:1px solid var(--line);padding:6px 9px}th{background:var(--th)}
+blockquote{border-left:3px solid var(--accent);padding-left:12px;color:var(--muted)}hr{border:0;border-top:1px solid var(--line)}
+.table-tools{display:flex;justify-content:flex-end;margin:12px 0 5px}.table-tools button{font:inherit;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer}.table-tools button:hover{background:var(--th)}button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ai-math[data-display="true"]{display:block;overflow-x:auto;margin:1em 0}.katex{font-size:1.1em}.katex-display{margin:.5em 0}img{max-width:100%}
+@media print{.table-tools{display:none}}
+</style>`;
+function applyTheme(theme){
+  document.documentElement.dataset.theme=theme;
+  if(frame.contentDocument)frame.contentDocument.documentElement.dataset.theme=theme;
+  const button=document.getElementById("theme-toggle");
+  button.textContent=theme==="dark"?"라이트 모드":"다크 모드";
+  button.setAttribute("aria-pressed",String(theme==="dark"));
+}
+let initialTheme="light";
+try{if(localStorage.getItem("r-ai-viewer-theme")==="dark")initialTheme="dark"}catch(e){}
+applyTheme(initialTheme);
+document.getElementById("theme-toggle").onclick=()=>{
+  const theme=document.documentElement.dataset.theme==="dark"?"light":"dark";
+  applyTheme(theme);try{localStorage.setItem("r-ai-viewer-theme",theme)}catch(e){}
+};
+function cleanClone(element){
+  const clone=element.cloneNode(true);
+  clone.querySelectorAll(".table-tools,script,style,link").forEach(el=>el.remove());
+  clone.querySelectorAll(".ai-math").forEach(el=>{el.textContent=el.getAttribute("data-tex")||el.textContent});
+  return clone;
+}
+function plainText(element){
+  if(element.nodeName==="TABLE")return Array.from(element.rows,row=>Array.from(row.cells,cell=>cell.textContent.trim().replace(/\s+/g," ")).join("\t")).join("\n");
+  const clone=element.cloneNode(true);
+  clone.querySelectorAll("table").forEach(table=>table.replaceWith(document.createTextNode("\n"+plainText(table)+"\n")));
+  clone.querySelectorAll("br").forEach(el=>el.replaceWith(document.createTextNode("\n")));
+  clone.querySelectorAll("p,div,h1,h2,h3,h4,h5,h6,li,pre,blockquote,tr").forEach(el=>el.appendChild(document.createTextNode("\n")));
+  return clone.textContent.trim();
+}
+async function copyContent(element,withQuestion=false){
+  const clone=cleanClone(element);
+  if(withQuestion){const question=document.createElement("p");question.textContent=document.getElementById("question").textContent;clone.prepend(question)}
+  const text=plainText(clone),html=clone.outerHTML;
+  try{
+    let copied=false;
+    if(navigator.clipboard&&window.ClipboardItem){
+      try{await navigator.clipboard.write([new ClipboardItem({"text/plain":new Blob([text],{type:"text/plain"}),"text/html":new Blob([html],{type:"text/html"})})]);copied=true}catch(e){}
+    }
+    if(!copied){
+      const active=document.activeElement,selection=window.getSelection(),ranges=[];
+      if(selection)for(let i=0;i<selection.rangeCount;i++)ranges.push(selection.getRangeAt(i).cloneRange());
+      const area=document.createElement("textarea");area.value=text;area.style.cssText="position:fixed;left:-9999px;top:0";document.body.appendChild(area);
+      const onCopy=event=>{if(event.clipboardData){event.clipboardData.setData("text/plain",text);event.clipboardData.setData("text/html",html);event.preventDefault()}};
+      document.addEventListener("copy",onCopy);
+      try{area.focus();area.select();copied=document.execCommand("copy")}finally{document.removeEventListener("copy",onCopy);area.remove();if(active)active.focus();if(selection){selection.removeAllRanges();ranges.forEach(range=>selection.addRange(range))}}
+      if(!copied)throw new Error("copy failed");
+    }
+    document.getElementById("copy-status").textContent=withQuestion?"전체 내용을 복사했습니다.":"표를 복사했습니다.";
+  }catch(e){document.getElementById("copy-status").textContent="복사하지 못했습니다. 내용을 선택한 뒤 Ctrl+C로 복사해 주세요."}
+}
+document.getElementById("copy-all").onclick=()=>{const content=frame.contentDocument.querySelector("#response-content");if(content)copyContent(content,true)};
+function renderMath(doc){if(!window.katex)return;doc.querySelectorAll(".ai-math").forEach(el=>{
+try{el.innerHTML=katex.renderToString(el.getAttribute("data-tex"),{displayMode:el.dataset.display==="true",throwOnError:false,trust:false,strict:"ignore"})}
+catch(e){el.title="수식 렌더링 오류: "+e.message}})}
+function decorate(doc){
+  applyTheme(document.documentElement.dataset.theme);renderMath(doc);
+  doc.querySelectorAll("#response-content table").forEach((table,index)=>{
+    const tools=doc.createElement("div"),button=doc.createElement("button");tools.className="table-tools";button.type="button";button.textContent="표 복사";button.setAttribute("aria-label",(index+1)+"번째 표 복사");button.onclick=()=>copyContent(table);tools.appendChild(button);table.before(tools);
+  });
+}
+function refresh(){const t=document.createElement("script");t.src="state.js?t="+Date.now();
+t.onload=()=>{const s=window.__ai_snapshot;if(s){document.getElementById("question").textContent="질문: "+s.question;
+document.getElementById("status").textContent=s.status;
+document.getElementById("copy-all").disabled=!s.html;
+if(s.html!==last){last=s.html;const doc=frame.contentDocument;
+const content=style+'<main id="response-content">'+(s.html||"<p>응답을 기다리는 중...</p>")+'</main>';
+if(doc&&doc.body){const nearEnd=doc.documentElement.scrollHeight-doc.documentElement.scrollTop-doc.documentElement.clientHeight<120;
+doc.body.innerHTML=content;decorate(doc);if(nearEnd)doc.documentElement.scrollTop=doc.documentElement.scrollHeight;}
+else {frame.onload=()=>decorate(frame.contentDocument);frame.srcdoc=content;}}}t.remove()};
+t.onerror=()=>t.remove();document.head.appendChild(t)}setInterval(refresh,450);refresh();
+</script></body></html>

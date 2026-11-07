@@ -1,0 +1,27 @@
+ai_continue             Continue the last AI response with its original
+                        data and conversation
+ai_last_response        Retrieve the most recent accumulated response
+ai_load_model           Load a selected model into a local server
+ai_models               List available text-generation models
+ai_settings             Inspect AI provider settings without revealing
+                        credentials
+ai_stop                 Stop the active AI response while retaining
+                        received text
+ai_test_connection      Test a selected model with a short generation
+                        request
+ai_viewer               RStudio Viewer에서 실시간 출력하는 통합 함수
+ai_window               질문 입력과 실시간 응답을 제공하는 독립 Tcl/Tk
+                        GUI.
+aistudio                aistudio chat with a live Markdown Viewer
+aistudio_setting        Configure aistudio in a separate window
+aistudio_window         Google AI Studio 전용 질문창 (API 키 마스킹
+                        입력)
+lemonade                lemonade chat with a live Markdown Viewer
+lemonade_setting        Configure lemonade in a separate window
+lemonade_window         Lemonade text question window
+lmstudio                lmstudio chat with a live Markdown Viewer
+lmstudio_setting        Configure lmstudio in a separate window
+lmstudio_window         LM Studio 전용 질문창
+ollama                  ollama chat with a live Markdown Viewer
+ollama_setting          Configure ollama in a separate window
+ollama_window           Ollama 전용 질문창

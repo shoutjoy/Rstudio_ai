@@ -1,0 +1,2 @@
+window.__ai_snapshot = {"question":"math preview","markdown":"$M = 2.81$ and \\(x_i^2\\)\n\n$$\\frac{a}{b}$$","html":"<p><span class=\"ai-math\" data-display=\"false\" data-tex=\"M = 2.81\">$M = 2.81$<\/span> and <span class=\"ai-math\" data-display=\"false\" data-tex=\"x_i^2\">\\(x_i^2\\)<\/span><\/p>\n<p><span class=\"ai-math\" data-display=\"true\" data-tex=\"\\frac{a}{b}\">$$\\frac{a}{b}$$<\/span><\/p>\n","status":"complete","stop_url":"http://127.0.0.1:46358/stop/file1b1c2eaf2468file1b1c39501f12","can_stop":false};
+

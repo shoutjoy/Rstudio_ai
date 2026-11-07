@@ -1,0 +1,1 @@
+window.__ai_snapshot = {"question":"math preview","html":"<p><span class=\"ai-math\" data-display=\"false\" data-tex=\"M = 2.81\">$M = 2.81$<\/span> and <span class=\"ai-math\" data-display=\"false\" data-tex=\"x_i^2\">\\(x_i^2\\)<\/span><\/p>\n<p><span class=\"ai-math\" data-display=\"true\" data-tex=\"\\frac{a}{b}\">$$\\frac{a}{b}$$<\/span><\/p>\n","status":"complete"};

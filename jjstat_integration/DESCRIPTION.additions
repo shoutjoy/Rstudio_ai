@@ -1,0 +1,7 @@
+# Merge into the corresponding fields of your existing DESCRIPTION.
+# Preserve the original package name, version, authors, license and dependencies.
+Depends: R (>= 4.1.0)
+Imports: jsonlite, processx, commonmark, tools, later
+Suggests: rstudioapi, tcltk
+SystemRequirements: curl
+Encoding: UTF-8

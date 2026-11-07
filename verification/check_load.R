@@ -1,0 +1,5 @@
+Sys.setlocale('LC_CTYPE','Korean_Korea.utf8')
+source('ai_clients.R',encoding='UTF-8')
+stopifnot(formals(lmstudio)$viewer,formals(lemonade)$viewer)
+print(ai_settings('lemonade'))
+stopifnot(identical(.ai_base('http://localhost:13305/api/v1',8000),'http://localhost:8000/api/v1'))

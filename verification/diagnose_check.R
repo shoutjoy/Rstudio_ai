@@ -1,0 +1,8 @@
+Sys.setlocale('LC_CTYPE','Korean_Korea.utf8')
+Sys.setenv(LC_ALL='Korean_Korea.utf8',R_LIBS=paste(.libPaths(),collapse=.Platform$path.sep))
+child <- tempfile(fileext='.R')
+writeLines(c('print(.libPaths())','print(Sys.getenv("R_LIBS"))','print(requireNamespace("jsonlite",quietly=TRUE))'),child)
+r <- processx::run(file.path(R.home('bin'),'Rscript.exe'),c('--vanilla',child),env=c('_R_CHECK_FORCE_SUGGESTS_'='false'))
+cat(r$stdout,r$stderr)
+print(environmentName(environment(flush.console)))
+unlink(child)

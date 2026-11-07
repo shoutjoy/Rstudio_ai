@@ -1,0 +1,16 @@
+library(jjstat)
+stopifnot(identical(formals(lmstudio)$viewer, TRUE), identical(formals(lemonade)$viewer, TRUE))
+assets <- jjstat:::.ai_math_dir()
+stopifnot(file.exists(file.path(assets,'katex.min.js')),file.exists(file.path(assets,'fonts')))
+for(provider in c('ollama','lmstudio','aistudio','lemonade')) {
+  stopifnot(is.function(getExportedValue('jjstat',provider)),is.function(getExportedValue('jjstat',paste0(provider,'_setting'))))
+}
+lemonade_setting(port=18000,model='test-model',open=FALSE)
+stopifnot(identical(ai_settings('lemonade')$base_url,'http://127.0.0.1:18000/api/v1'))
+cat('PASS: installed package exports, Viewer defaults, asset paths and settings\n')
+stopifnot(is.function(ai_history),file.exists(file.path(jjstat:::.ai_ui_dir(),'vendor.js')))
+stopifnot(identical(eval(formals(ai_window)$engine),c('web','tk')))
+w<-lmstudio_window(model='mock',launch=FALSE,history_dir=tempfile('history_'))
+stopifnot(inherits(w,'jjstat_ai_window'),grepl('http://127.0.0.1:',w$url,fixed=TRUE))
+w$close()
+cat('PASS: installed web UI assets, ai_history export, web default and isolated worker startup\n')

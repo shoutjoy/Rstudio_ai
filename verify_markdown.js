@@ -1,0 +1,1 @@
+const{spawnSync}=require('child_process');const r=spawnSync(process.env.RSCRIPT||'Rscript',['--vanilla','jjstat_integration/tools/verify_web.R'],{stdio:'inherit'});process.exit(r.status===null?1:r.status);

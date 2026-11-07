@@ -1,0 +1,15 @@
+Sys.setlocale('LC_CTYPE','Korean_Korea.utf8')
+Sys.setenv(LC_ALL='Korean_Korea.utf8',LC_CTYPE='Korean_Korea.utf8')
+Sys.setenv(R_LIBS=paste(.libPaths(),collapse=.Platform$path.sep))
+cat('Library paths:',paste(.libPaths(),collapse=';'),'\n')
+folder <- normalizePath('verification/package-smoke',winslash='/')
+rbin <- file.path(R.home('bin'),'Rcmd.exe')
+result <- processx::run(rbin,c('build','--no-build-vignettes','jjstat'),wd=folder,error_on_status=FALSE,timeout=120000)
+cat(result$stdout,result$stderr)
+if(result$status!=0L) stop('Package build failed')
+tarball <- list.files(folder,pattern='[.]tar[.]gz$',full.names=TRUE)
+check_env <- Sys.getenv(); check_env[['_R_CHECK_FORCE_SUGGESTS_']] <- 'false'
+result <- processx::run(rbin,c('check','--no-manual','--no-build-vignettes',basename(tarball[[1L]])),
+  wd=folder,error_on_status=FALSE,timeout=180000,env=check_env)
+cat(result$stdout,result$stderr)
+if(result$status!=0L) stop('Package check failed; see verification/package-smoke/jjstat.Rcheck')
